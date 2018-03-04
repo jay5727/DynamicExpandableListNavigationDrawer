@@ -1,0 +1,39 @@
+{
+  "menu": [
+    {
+      "Title": "Facebook",
+      "URL": "com.example.jay.dynamicexpandablelistnavigationdrawer.fragment.FirstFragment"
+    },
+    {
+      "Title": "Youtube",
+      "Child": [
+        {
+          "ChildTitle": "Customer List",
+          "URL": "com.example.jay.dynamicexpandablelistnavigationdrawer.fragment.SecondFragment"
+        }
+      ]
+    },
+    {
+      "Title": "WhatsApp",
+      "Child": [
+        {
+          "ChildTitle": "Payment Pending List",
+          "URL": "com.example.jay.dynamicexpandablelistnavigationdrawer.fragment.ThirdFragment"
+        }
+      ]
+    },
+    {
+      "Title": "Twitter",
+      "Child": [
+        {
+          "ChildTitle": "Fourth",
+          "URL": "com.example.jay.dynamicexpandablelistnavigationdrawer.fragment.FourthFragment"
+        },
+        {
+          "ChildTitle": "Fifth",
+          "URL": "com.example.jay.dynamicexpandablelistnavigationdrawer.fragment.FifthFragment"
+        }
+      ]
+    }
+  ]
+}
