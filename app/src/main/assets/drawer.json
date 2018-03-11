@@ -8,7 +8,7 @@
       "Title": "Youtube",
       "Child": [
         {
-          "ChildTitle": "Customer List",
+          "ChildTitle": "Youtube",
           "URL": "com.example.jay.dynamicexpandablelistnavigationdrawer.fragment.SecondFragment"
         }
       ]
@@ -17,7 +17,7 @@
       "Title": "WhatsApp",
       "Child": [
         {
-          "ChildTitle": "Payment Pending List",
+          "ChildTitle": "WhatsApp",
           "URL": "com.example.jay.dynamicexpandablelistnavigationdrawer.fragment.ThirdFragment"
         }
       ]
@@ -26,11 +26,11 @@
       "Title": "Twitter",
       "Child": [
         {
-          "ChildTitle": "Fourth",
+          "ChildTitle": "Twitter",
           "URL": "com.example.jay.dynamicexpandablelistnavigationdrawer.fragment.FourthFragment"
         },
         {
-          "ChildTitle": "Fifth",
+          "ChildTitle": "MyFragment",
           "URL": "com.example.jay.dynamicexpandablelistnavigationdrawer.fragment.FifthFragment"
         }
       ]

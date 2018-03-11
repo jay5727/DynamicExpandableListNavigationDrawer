@@ -1,11 +1,13 @@
 package com.example.jay.dynamicexpandablelistnavigationdrawer.activity;
 
+import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -13,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.jay.dynamicexpandablelistnavigationdrawer.R;
 import com.example.jay.dynamicexpandablelistnavigationdrawer.adapter.ExpandListAdapter;
@@ -28,9 +31,13 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-
     ExpandableListView expListView;
     int lastExpandedPosition = -1;
+
+    ArrayList<String> listDataHeader;
+    HashMap<String, List<String>> listDataChild;
+    HashMap<String, List<String>> listURLChild;
+    HashMap<String, String> childLessList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        //drawer.setDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -53,13 +60,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         TextView userProfileName = (TextView) navigationView.getHeaderView(0).findViewById(R.id.userProfileName);
         TextView userAvatar = (TextView) navigationView.getHeaderView(0).findViewById(R.id.userAvatar);
 
-        //userProfileName.setText(SessionManager.getString(this, getString(R.string.profile_name)));
-        //userAvatar.setText(homePresenter.getUserAvatar(SessionManager.getString(this, getString(R.string.profile_name))));
+        userProfileName.setText("Jay");
+        userAvatar.setText(getUserAvatar("Jay"));
 
         expListView = (ExpandableListView) findViewById(R.id.left_drawer);
 
         enableExpandableList();
-        //setFragment(0, 0);
+        setFragment(0, 0);
     }
 
     @Override
@@ -67,13 +74,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return false;
     }
 
+
     private void enableExpandableList() {
 
         try {
-            prepareMenuList(getAssets().open("menu.json"));
+            prepareMenuList(getAssets().open("drawer.json"));
         } catch (Exception e) {
         }
-        //  prepareListData(listDataHeader, listDataChild,listURLChild);
 
         ExpandListAdapter listAdapter = new ExpandListAdapter(this, listDataHeader, listDataChild);
         // setting list adapter
@@ -84,18 +91,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v,
                                         int groupPosition, long id) {
-                /*if (groupPosition == 0)
-                    setFragment(groupPosition, 0);*/
                 try {
-                    String parentAsKey = listDataHeader.get(groupPosition);
-                    List <String> childLessParent = listURLChild.get(parentAsKey);
-                    if(childLessParent.size() == 0)
-                    {
+                    if (!checkIfChildExist(groupPosition))
                         setFragment(groupPosition, -1);
 
-                    }
-                }catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     String s = ex.getMessage();
                 }
                 return false;
@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        // Listview Group collasped listener
+        // Listview Group collapsed listener
         expListView.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
 
             @Override
@@ -144,12 +144,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    ArrayList<String> listDataHeader;
-    HashMap<String, List<String>> listDataChild;
-    HashMap<String, List<String>> listURLChild;
-
-    HashMap<String, String> childLessList;
-
     public void prepareMenuList(InputStream inputStream) {
         try {
             listDataHeader = new ArrayList<String>();
@@ -167,8 +161,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 List<String> childURL = null;
                 String title = jsonObject.getString("Title");
                 listDataHeader.add(title);
-                if (jsonObject.has("Child"))
-                {
+                if (jsonObject.has("Child")) {
                     childList = new ArrayList<String>();
                     childURL = new ArrayList<String>();
                     JSONArray jsonArrayChild = jsonObject.getJSONArray("Child");
@@ -180,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 } else
                 //we know there wasn't any child for sure
-                //meaning a childLess List in which case parentHeaderName as a key to our  childLess HashMap
+                //meaning a childLess List in which case pass  parentHeaderName as a key to our childLess HashMap.
                 {
                     childLessList.put(title, jsonObject.getString("URL"));
                 }
@@ -211,12 +204,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void setFragment(int groupPosition, int childPosition) {
         Fragment fragment = null;
-      /*  if (groupPosition == 0)
-            fragment = new FirstFragment();
-        else*/
-
+        if (!checkIfChildExist(groupPosition))
+            fragment = getFragment(groupPosition, -1);
+        else
             fragment = getFragment(groupPosition, childPosition);
-
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
@@ -234,11 +225,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public Fragment getFragment(int groupPosition, int childPosition) {
         Fragment fragment = null;
-
         String groupHeader = listDataHeader.get(groupPosition);
-        //String childName = listDataChild.get(groupHeader).get(childPosition);
         String fragmentName = null;
-
         try {
 
             if (childPosition == -1) {
@@ -250,8 +238,109 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragment = (Fragment) Class.forName(fragmentName).newInstance();
 
         } catch (Exception e) {
-
+            //java.lang.IndexOutOfBoundsException: Invalid index 0, size is 0
+            String s = e.getMessage();
         }
         return fragment;
     }
+
+    /**
+     *
+     * @param groupPosition : header position
+     * @return true if child exist for group position else false
+     */
+    private boolean checkIfChildExist(int groupPosition) {
+        try {
+            String parentAsKey = listDataHeader.get(groupPosition);
+            List<String> childList = listURLChild.get(parentAsKey);
+            if (childList.size() == 0) {
+                return false;
+            }
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public String getUserAvatar(String s) {
+        String temp = null;
+        if (s != null) {
+            String[] x = s.split(" ");
+            if (x.length == 1) {
+                temp = String.valueOf(x[0].charAt(0));
+            } else //greater than 1
+            {
+                temp = String.valueOf(x[0].charAt(0)) + String.valueOf(x[x.length - 1].charAt(0));
+            }
+        }
+        return temp != null ? temp.toUpperCase() : "";
+    }
+
+   /* @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if (getTopFragment() == null)
+            exit();
+    }*/
+
+    @Override
+    public void onBackPressed() {
+        if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
+            super.onBackPressed();
+        } else {
+            //let the last fragment remain & show exit alert...!
+            exit();
+        }
+
+       /* List<Fragment> fragmentList = getSupportFragmentManager().getFragments();
+        if (fragmentList != null && fragmentList.size() > 0)
+        {
+            for (int i = 0; i < fragmentList.size(); i++) {
+                if (i == fragmentList.size() - 1) {
+                    //let the last fragment remain & show exit alert...!
+                    exit();
+
+                } else {
+                    super.onBackPressed();
+                }
+            }
+        }*/
+    }
+
+    public boolean exit() {
+        AlertDialog.Builder alertbox = new AlertDialog.Builder(this);
+
+        alertbox.setTitle("Do You Want To Exit ?");
+        alertbox.setMessage("Click yes to exit!")
+                .setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface arg0, int arg1) {
+                        //moveTaskToBack(true);
+                        finish();
+                    }
+                });
+
+        alertbox.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface arg0, int arg1) {
+                // Nothing will be happened when clicked on no button
+                // of Dialog
+            }
+        });
+
+        alertbox.show();
+        return true;
+    }
+
+    public Fragment getTopFragment() {
+        List<Fragment> fragentList = getSupportFragmentManager().getFragments();
+        Fragment top = null;
+        for (int i = fragentList.size() - 1; i >= 0; i--) {
+            top = fragentList.get(i);
+            if (top != null) {
+                return top;
+            }
+        }
+        return top;
+    }
+
 }

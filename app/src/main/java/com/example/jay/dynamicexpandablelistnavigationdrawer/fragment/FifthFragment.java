@@ -1,16 +1,14 @@
 package com.example.jay.dynamicexpandablelistnavigationdrawer.fragment;
 
 import android.os.Bundle;
-
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.jay.dynamicexpandablelistnavigationdrawer.R;
 
-public class FifthFragment extends Fragment {
+public class FifthFragment extends BaseFragment {
 
     public FifthFragment() {
         // Required empty public constructor
@@ -20,13 +18,12 @@ public class FifthFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View inflate = inflater.inflate(R.layout.frag_five, container, false);
-        //setTitle(this);
+        setTitle("Jay5727");
         return inflate;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
     }
 }
